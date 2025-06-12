@@ -17,6 +17,7 @@ A professional cryptocurrency trading platform built with React, TypeScript, Cha
 - 📊 User Dashboard with Balance & Trade History
 - 👑 Admin Dashboard for Platform Management
 - 📤 Manual Withdrawal Request System
+- 💬 Real-time Live Chat System with Admin Support
 - 🔄 Live Price Integration via CoinGecko
 
 ## Getting Started

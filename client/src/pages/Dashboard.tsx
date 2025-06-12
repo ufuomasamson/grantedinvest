@@ -57,6 +57,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { FaWallet, FaArrowUp, FaArrowDown, FaExchangeAlt, FaSignOutAlt, FaChartLine, FaRocket, FaClock } from 'react-icons/fa';
 import { supabase } from '../lib/supabase';
 import { WithdrawModal } from '../components/WithdrawModal';
+import { ChatIcon } from '../components/Chat/ChatIcon';
 
 interface PortfolioCoin {
   id: string;
@@ -1446,6 +1447,9 @@ export function Dashboard() {
         onClose={() => setIsTradeModalOpen(false)}
         selectedCoin={selectedCoin}
       />
+
+      {/* Live Chat Icon */}
+      <ChatIcon />
     </Container>
   );
-} 
+}

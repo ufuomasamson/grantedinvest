@@ -76,10 +76,12 @@ import {
   FaHome,
   FaSignOutAlt,
   FaUpload,
+  FaComments,
 } from 'react-icons/fa';
 import { supabaseAdmin } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { AdminChatPanel } from '../components/Chat/AdminChatPanel';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -379,6 +381,7 @@ export function AdminDashboard() {
     { id: 'trades', label: 'Trade Management', icon: FaExchangeAlt },
     { id: 'deposits', label: 'Deposits', icon: FaArrowUp },
     { id: 'withdrawals', label: 'Withdrawals', icon: FaArrowDown },
+    { id: 'chat', label: 'Live Chat', icon: FaComments },
     { id: 'wallets', label: 'Wallet Management', icon: FaWallet },
     { id: 'analytics', label: 'Analytics', icon: FaChartLine },
     { id: 'history', label: 'Transaction History', icon: FaHistory },
@@ -493,6 +496,8 @@ export function AdminDashboard() {
         return renderDeposits();
       case 'withdrawals':
         return renderWithdrawals();
+      case 'chat':
+        return renderChat();
       case 'wallets':
         return renderWalletManagement();
       case 'analytics':
@@ -1811,6 +1816,13 @@ export function AdminDashboard() {
       </VStack>
     );
   };
+
+  const renderChat = () => (
+    <VStack spacing={6} align="stretch">
+      <Heading size="lg" color="white">Live Chat Management</Heading>
+      <AdminChatPanel />
+    </VStack>
+  );
 
   const renderWalletManagement = () => (
       <VStack spacing={6} align="stretch">

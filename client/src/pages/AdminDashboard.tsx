@@ -199,13 +199,24 @@ export function AdminDashboard() {
 
       // Fetch pending deposits
       console.log('Admin: Fetching pending deposits...');
+      console.log('Admin: Using supabaseAdmin client:', !!supabaseAdmin);
+      console.log('Admin: Environment check:', {
+        hasUrl: !!import.meta.env.VITE_SUPABASE_URL,
+        hasServiceKey: !!import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY,
+        hasOldServiceKey: !!import.meta.env.VITE_SUPABASE_SERVICE_KEY
+      });
+
       const { data: depositsData, error: depositsError } = await supabaseAdmin
         .from('deposits')
         .select('*')
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
-      console.log('Admin: Deposits query result:', { depositsData, depositsError });
+      console.log('Admin: Deposits query result:', {
+        depositsData,
+        depositsError,
+        depositsCount: depositsData?.length || 0
+      });
 
       if (depositsError) {
         console.error('Error fetching deposits:', depositsError);
@@ -512,17 +523,31 @@ export function AdminDashboard() {
                 // Test deposits access
                 const { data: allDeposits, error: depositsError } = await supabaseAdmin
                   .from('deposits')
-                  .select('*');
+                  .select('*')
+                  .order('created_at', { ascending: false });
                 console.log('All deposits:', allDeposits);
                 console.log('Deposits error:', depositsError);
+                console.log('Deposits by status:', allDeposits?.reduce((acc, dep) => {
+                  acc[dep.status] = (acc[dep.status] || 0) + 1;
+                  return acc;
+                }, {}));
 
                 // Test pending deposits
                 const { data: pendingDeps, error: pendingError } = await supabaseAdmin
                   .from('deposits')
                   .select('*')
-                  .eq('status', 'pending');
+                  .eq('status', 'pending')
+                  .order('created_at', { ascending: false });
                 console.log('Pending deposits:', pendingDeps);
                 console.log('Pending error:', pendingError);
+
+                // Test with regular client
+                const { data: regularDeposits, error: regularError } = await supabase
+                  .from('deposits')
+                  .select('*')
+                  .order('created_at', { ascending: false });
+                console.log('Regular client deposits:', regularDeposits);
+                console.log('Regular client error:', regularError);
 
                 // Test user balances access
                 const { data: balances, error: balancesError } = await supabaseAdmin

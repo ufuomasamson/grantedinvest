@@ -43,7 +43,7 @@ export function Services() {
     <Box bg="black" minH="100vh">
       {/* Hero Section */}
       <Box
-        py={20}
+        py={{ base: 12, md: 20 }}
         bg="linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)"
         position="relative"
         overflow="hidden"
@@ -61,23 +61,23 @@ export function Services() {
           zIndex: 0
         }}
       >
-        <Container maxW="container.xl" position="relative" zIndex={1}>
+        <Container maxW="container.xl" position="relative" zIndex={1} px={{ base: 4, md: 8 }}>
           <VStack spacing={8} textAlign="center">
             <VStack spacing={4}>
-              <Text 
-                fontSize="sm" 
-                color="orange.400" 
-                fontWeight="bold" 
-                textTransform="uppercase" 
+              <Text
+                fontSize={{ base: "xs", md: "sm" }}
+                color="orange.400"
+                fontWeight="bold"
+                textTransform="uppercase"
                 letterSpacing="wider"
               >
                 Our Services
               </Text>
-              <Heading size="3xl" color="white" maxW="800px">
+              <Heading size={{ base: "xl", md: "2xl", lg: "3xl" }} color="white" maxW="800px">
                 Professional Trading Solutions for Every Need
               </Heading>
-              <Text fontSize="xl" color="gray.400" maxW="700px" lineHeight="1.6">
-                From beginner-friendly tools to advanced trading features, we provide 
+              <Text fontSize={{ base: "lg", md: "xl" }} color="gray.400" maxW="700px" lineHeight="1.6">
+                From beginner-friendly tools to advanced trading features, we provide
                 everything you need to succeed in cryptocurrency markets.
               </Text>
             </VStack>

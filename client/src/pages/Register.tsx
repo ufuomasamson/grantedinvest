@@ -78,12 +78,12 @@ export function Register() {
   };
 
   return (
-    <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" bg="black">
-      <Container maxW="400px" p={6}>
-        <Box bg="gray.900" p={8} borderRadius="xl" boxShadow="xl">
-          <VStack spacing={6}>
-            <Heading color="white">Create Account</Heading>
-            <Text color="gray.400">Sign up to start trading</Text>
+    <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" bg="black" px={{ base: 4, md: 0 }}>
+      <Container maxW="400px" p={{ base: 4, md: 6 }}>
+        <Box bg="gray.900" p={{ base: 6, md: 8 }} borderRadius="xl" boxShadow="xl">
+          <VStack spacing={{ base: 4, md: 6 }}>
+            <Heading color="white" size={{ base: "lg", md: "xl" }}>Create Account</Heading>
+            <Text color="gray.400" fontSize={{ base: "sm", md: "md" }}>Sign up to start trading</Text>
 
             <form onSubmit={handleSubmit} style={{ width: '100%' }}>
               <VStack spacing={4}>

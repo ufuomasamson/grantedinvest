@@ -40,7 +40,7 @@ export function About() {
     <Box bg="black" minH="100vh">
       {/* Hero Section */}
       <Box
-        py={20}
+        py={{ base: 12, md: 20 }}
         bg="linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)"
         position="relative"
         overflow="hidden"
@@ -58,23 +58,23 @@ export function About() {
           zIndex: 0
         }}
       >
-        <Container maxW="container.xl" position="relative" zIndex={1}>
+        <Container maxW="container.xl" position="relative" zIndex={1} px={{ base: 4, md: 8 }}>
           <VStack spacing={8} textAlign="center">
             <VStack spacing={4}>
-              <Text 
-                fontSize="sm" 
-                color="orange.400" 
-                fontWeight="bold" 
-                textTransform="uppercase" 
+              <Text
+                fontSize={{ base: "xs", md: "sm" }}
+                color="orange.400"
+                fontWeight="bold"
+                textTransform="uppercase"
                 letterSpacing="wider"
               >
                 About Our Platform
               </Text>
-              <Heading size="3xl" color="white" maxW="800px">
+              <Heading size={{ base: "xl", md: "2xl", lg: "3xl" }} color="white" maxW="800px">
                 Building the Future of Cryptocurrency Trading
               </Heading>
-              <Text fontSize="xl" color="gray.400" maxW="700px" lineHeight="1.6">
-                We're revolutionizing digital asset trading with cutting-edge technology, 
+              <Text fontSize={{ base: "lg", md: "xl" }} color="gray.400" maxW="700px" lineHeight="1.6">
+                We're revolutionizing digital asset trading with cutting-edge technology,
                 unmatched security, and a commitment to transparency that puts our users first.
               </Text>
             </VStack>

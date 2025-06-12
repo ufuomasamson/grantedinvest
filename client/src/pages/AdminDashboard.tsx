@@ -3869,14 +3869,16 @@ export function AdminDashboard() {
   }
 
   return (
-    <Flex h="calc(100vh - 64px)">
+    <Flex h="calc(100vh - 64px)" direction={{ base: "column", lg: "row" }}>
       {/* Desktop Sidebar */}
       <Box
-        w="250px"
+        w={{ base: "full", lg: "250px" }}
         bg="gray.900"
-        borderRight="1px"
+        borderRight={{ base: "none", lg: "1px" }}
+        borderBottom={{ base: "1px", lg: "none" }}
         borderColor="gray.700"
-        display={{ base: "none", md: "block" }}
+        display={{ base: "block", lg: "block" }}
+        overflowX={{ base: "auto", lg: "visible" }}
       >
         <VStack spacing={0} align="stretch">
           {/* Admin Header */}
@@ -3994,7 +3996,7 @@ export function AdminDashboard() {
 
       {/* Main Content */}
       <Box flex="1" overflow="auto">
-        <Container maxW="container.xl" py={8}>
+        <Container maxW="container.xl" py={{ base: 4, md: 8 }} px={{ base: 4, md: 8 }}>
           {renderContent()}
         </Container>
       </Box>

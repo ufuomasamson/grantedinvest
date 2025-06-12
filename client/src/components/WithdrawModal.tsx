@@ -184,18 +184,18 @@ export function WithdrawModal({ isOpen, onClose, userBalance, onWithdrawSuccess 
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="lg">
+    <Modal isOpen={isOpen} onClose={handleClose} size={{ base: "full", md: "lg" }}>
       <ModalOverlay />
-      <ModalContent bg="gray.800" color="white">
-        <ModalHeader>Withdraw Funds</ModalHeader>
+      <ModalContent bg="gray.800" color="white" mx={{ base: 4, md: 0 }} my={{ base: 0, md: "auto" }}>
+        <ModalHeader fontSize={{ base: "lg", md: "xl" }}>Withdraw Funds</ModalHeader>
         <ModalCloseButton />
-        <ModalBody>
-          <VStack spacing={4}>
-            <Alert status="info" bg="blue.900" color="white">
+        <ModalBody px={{ base: 4, md: 6 }}>
+          <VStack spacing={{ base: 3, md: 4 }}>
+            <Alert status="info" bg="blue.900" color="white" borderRadius="md">
               <AlertIcon />
               <Box>
-                <Text fontWeight="bold">Available Balance: ${userBalance.toLocaleString()}</Text>
-                <Text fontSize="sm">Withdrawals are processed within 24-48 hours after verification.</Text>
+                <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>Available Balance: ${userBalance.toLocaleString()}</Text>
+                <Text fontSize={{ base: "xs", md: "sm" }}>Withdrawals are processed within 24-48 hours after verification.</Text>
               </Box>
             </Alert>
 
@@ -357,8 +357,15 @@ export function WithdrawModal({ isOpen, onClose, userBalance, onWithdrawSuccess 
           </VStack>
         </ModalBody>
 
-        <ModalFooter>
-          <Button variant="ghost" mr={3} onClick={handleClose} isDisabled={isSubmitting}>
+        <ModalFooter px={{ base: 4, md: 6 }} flexDirection={{ base: "column", md: "row" }} gap={{ base: 2, md: 0 }}>
+          <Button
+            variant="ghost"
+            mr={{ base: 0, md: 3 }}
+            onClick={handleClose}
+            isDisabled={isSubmitting}
+            w={{ base: "full", md: "auto" }}
+            order={{ base: 2, md: 1 }}
+          >
             Cancel
           </Button>
           <Button
@@ -371,6 +378,8 @@ export function WithdrawModal({ isOpen, onClose, userBalance, onWithdrawSuccess 
               (withdrawalType === 'crypto' && !walletAddress) ||
               (withdrawalType === 'bank' && (!bankName || !accountHolderName || !accountNumber))
             }
+            w={{ base: "full", md: "auto" }}
+            order={{ base: 1, md: 2 }}
           >
             Submit Withdrawal Request
           </Button>

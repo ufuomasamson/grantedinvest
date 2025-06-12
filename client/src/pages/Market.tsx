@@ -97,10 +97,10 @@ export function Market() {
   };
 
   return (
-    <Box minH="100vh" bg="black" py={8}>
-      <Container maxW="container.xl">
-        <VStack spacing={8} align="stretch">
-          <Heading size="xl" color="white">Cryptocurrency Market</Heading>
+    <Box minH="100vh" bg="black" py={{ base: 4, md: 8 }}>
+      <Container maxW="container.xl" px={{ base: 4, md: 8 }}>
+        <VStack spacing={{ base: 6, md: 8 }} align="stretch">
+          <Heading size={{ base: "lg", md: "xl" }} color="white">Cryptocurrency Market</Heading>
           
           <Card bg="gray.900" borderRadius="xl" p={4}>
             <CardBody>
@@ -132,14 +132,14 @@ export function Market() {
             <Card bg="gray.900" borderRadius="xl" overflow="hidden">
               <CardBody p={0}>
                 <Box overflowX="auto">
-                  <Table variant="simple">
+                  <Table variant="simple" size={{ base: "sm", md: "md" }}>
                     <Thead bg="gray.800">
                       <Tr>
                         <Th color="gray.400">Asset</Th>
                         <Th color="gray.400" isNumeric>Price</Th>
-                        <Th color="gray.400" isNumeric>24h Change</Th>
-                        <Th color="gray.400" isNumeric>Market Cap</Th>
-                        <Th color="gray.400" isNumeric>Volume (24h)</Th>
+                        <Th color="gray.400" isNumeric display={{ base: "none", md: "table-cell" }}>24h Change</Th>
+                        <Th color="gray.400" isNumeric display={{ base: "none", lg: "table-cell" }}>Market Cap</Th>
+                        <Th color="gray.400" isNumeric display={{ base: "none", lg: "table-cell" }}>Volume (24h)</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
@@ -150,27 +150,40 @@ export function Market() {
                           transition="background-color 0.2s"
                         >
                           <Td>
-                            <HStack spacing={3}>
+                            <HStack spacing={{ base: 2, md: 3 }}>
                               <Image
                                 src={coin.image}
                                 alt={coin.name}
-                                boxSize="32px"
+                                boxSize={{ base: "24px", md: "32px" }}
                                 borderRadius="full"
                               />
                               <Box>
-                                <Text color="white" fontWeight="bold">
+                                <Text color="white" fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>
                                   {coin.name}
                                 </Text>
-                                <Text color="gray.400" fontSize="sm">
+                                <Text color="gray.400" fontSize={{ base: "xs", md: "sm" }}>
                                   {coin.symbol.toUpperCase()}
                                 </Text>
                               </Box>
                             </HStack>
                           </Td>
-                          <Td isNumeric color="white">
-                            ${coin.current_price.toLocaleString()}
+                          <Td isNumeric color="white" fontSize={{ base: "sm", md: "md" }}>
+                            <VStack spacing={0} align="flex-end">
+                              <Text>${coin.current_price.toLocaleString()}</Text>
+                              <Badge
+                                colorScheme={coin.price_change_percentage_24h >= 0 ? "green" : "red"}
+                                px={1}
+                                py={0}
+                                borderRadius="md"
+                                fontSize="xs"
+                                display={{ base: "block", md: "none" }}
+                              >
+                                {coin.price_change_percentage_24h >= 0 ? "+" : ""}
+                                {coin.price_change_percentage_24h.toFixed(2)}%
+                              </Badge>
+                            </VStack>
                           </Td>
-                          <Td isNumeric>
+                          <Td isNumeric display={{ base: "none", md: "table-cell" }}>
                             <Badge
                               colorScheme={coin.price_change_percentage_24h >= 0 ? "green" : "red"}
                               px={2}
@@ -181,11 +194,11 @@ export function Market() {
                               {coin.price_change_percentage_24h.toFixed(2)}%
                             </Badge>
                           </Td>
-                          <Td isNumeric color="white">
-                            ${coin.market_cap.toLocaleString()}
+                          <Td isNumeric color="white" display={{ base: "none", lg: "table-cell" }}>
+                            {formatNumber(coin.market_cap)}
                           </Td>
-                          <Td isNumeric color="white">
-                            ${coin.total_volume.toLocaleString()}
+                          <Td isNumeric color="white" display={{ base: "none", lg: "table-cell" }}>
+                            {formatNumber(coin.total_volume)}
                           </Td>
                         </Tr>
                       ))}

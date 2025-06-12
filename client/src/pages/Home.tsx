@@ -217,8 +217,8 @@ export function Home() {
           zIndex: 0
         }}
       >
-        <Container maxW="container.xl" position="relative" zIndex={1} pt={20}>
-          <Grid templateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={12} alignItems="center" minH="80vh">
+        <Container maxW="container.xl" position="relative" zIndex={1} pt={{ base: 16, md: 20 }} px={{ base: 4, md: 8 }}>
+          <Grid templateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={{ base: 8, lg: 12 }} alignItems="center" minH={{ base: "70vh", lg: "80vh" }}>
             <GridItem>
               <VStack
                 align="flex-start"
@@ -237,7 +237,7 @@ export function Home() {
                     Professional Trading Platform
                   </Text>
                   <Heading
-                    size="4xl"
+                    size={{ base: "2xl", md: "3xl", lg: "4xl" }}
                     color="white"
                     lineHeight="1.1"
                     fontWeight="900"
@@ -247,7 +247,7 @@ export function Home() {
                     <Text as="span" color="orange.400"> Like a Pro</Text>
                   </Heading>
                   <Text
-                    fontSize="xl"
+                    fontSize={{ base: "lg", md: "xl" }}
                     color="gray.300"
                     maxW="500px"
                     lineHeight="1.6"
@@ -257,61 +257,65 @@ export function Home() {
                   </Text>
                 </Box>
 
-                <HStack spacing={6}>
-                  <Button
-                    size="lg"
-                    bg="orange.400"
-                    color="black"
-                    fontWeight="bold"
-                    px={8}
-                    py={6}
-                    borderRadius="md"
-                    _hover={{
-                      bg: 'orange.300',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 10px 25px rgba(255, 119, 48, 0.3)'
-                    }}
-                    transition="all 0.3s ease"
-                    rightIcon={<FaArrowRight />}
-                    onClick={() => user ? navigate('/dashboard') : navigate('/register')}
-                  >
-                    {user ? 'Go to Dashboard' : 'Start Trading'}
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    borderColor="gray.600"
-                    color="white"
-                    fontWeight="bold"
-                    px={8}
-                    py={6}
-                    borderRadius="md"
-                    _hover={{
-                      borderColor: 'orange.400',
-                      color: 'orange.400',
-                      transform: 'translateY(-2px)'
-                    }}
-                    transition="all 0.3s ease"
-                    leftIcon={<FaPlay />}
-                  >
-                    Watch Demo
-                  </Button>
-                </HStack>
+                <VStack spacing={4} w="full" align="flex-start">
+                  <HStack spacing={{ base: 4, md: 6 }} flexWrap="wrap">
+                    <Button
+                      size={{ base: "md", md: "lg" }}
+                      bg="orange.400"
+                      color="black"
+                      fontWeight="bold"
+                      px={{ base: 6, md: 8 }}
+                      py={{ base: 4, md: 6 }}
+                      borderRadius="md"
+                      _hover={{
+                        bg: 'orange.300',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 10px 25px rgba(255, 119, 48, 0.3)'
+                      }}
+                      transition="all 0.3s ease"
+                      rightIcon={<FaArrowRight />}
+                      onClick={() => user ? navigate('/dashboard') : navigate('/register')}
+                      w={{ base: "full", sm: "auto" }}
+                    >
+                      {user ? 'Go to Dashboard' : 'Start Trading'}
+                    </Button>
+                    <Button
+                      size={{ base: "md", md: "lg" }}
+                      variant="outline"
+                      borderColor="gray.600"
+                      color="white"
+                      fontWeight="bold"
+                      px={{ base: 6, md: 8 }}
+                      py={{ base: 4, md: 6 }}
+                      borderRadius="md"
+                      _hover={{
+                        borderColor: 'orange.400',
+                        color: 'orange.400',
+                        transform: 'translateY(-2px)'
+                      }}
+                      transition="all 0.3s ease"
+                      leftIcon={<FaPlay />}
+                      w={{ base: "full", sm: "auto" }}
+                    >
+                      Watch Demo
+                    </Button>
+                  </HStack>
+                </VStack>
 
-                <HStack spacing={8} pt={4}>
+                <SimpleGrid columns={{ base: 3, md: 3 }} spacing={{ base: 4, md: 8 }} pt={4} w="full">
                   <VStack spacing={1} align="flex-start">
-                    <Text fontSize="2xl" fontWeight="bold" color="white">$2.4B+</Text>
-                    <Text fontSize="sm" color="gray.400">Trading Volume</Text>
+                    <Text fontSize={{ base: "lg", md: "2xl" }} fontWeight="bold" color="white">$2.4B+</Text>
+                    <Text fontSize={{ base: "xs", md: "sm" }} color="gray.400">Trading Volume</Text>
                   </VStack>
                   <VStack spacing={1} align="flex-start">
-                    <Text fontSize="2xl" fontWeight="bold" color="white">150K+</Text>
-                    <Text fontSize="sm" color="gray.400">Active Traders</Text>
+                    <Text fontSize={{ base: "lg", md: "2xl" }} fontWeight="bold" color="white">150K+</Text>
+                    <Text fontSize={{ base: "xs", md: "sm" }} color="gray.400">Active Traders</Text>
                   </VStack>
                   <VStack spacing={1} align="flex-start">
-                    <Text fontSize="2xl" fontWeight="bold" color="white">99.9%</Text>
-                    <Text fontSize="sm" color="gray.400">Uptime</Text>
+                    <Text fontSize={{ base: "lg", md: "2xl" }} fontWeight="bold" color="white">99.9%</Text>
+                    <Text fontSize={{ base: "xs", md: "sm" }} color="gray.400">Uptime</Text>
                   </VStack>
-                </HStack>
+                </SimpleGrid>
               </VStack>
             </GridItem>
 

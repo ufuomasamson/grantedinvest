@@ -1002,8 +1002,8 @@ export function Dashboard() {
   }
 
   return (
-    <Container maxW="container.xl" py={8}>
-      <VStack spacing={8} align="stretch">
+    <Container maxW="container.xl" py={{ base: 4, md: 8 }} px={{ base: 4, md: 8 }}>
+      <VStack spacing={{ base: 6, md: 8 }} align="stretch">
         {/* Welcome Section */}
         <Box>
           <Heading size="xl" color="white" mb={2}>
@@ -1030,20 +1030,24 @@ export function Dashboard() {
                   <Text fontSize="3xl" fontWeight="bold" color="white">
                     ${totalValue.toLocaleString()}
                   </Text>
-                  <HStack spacing={4}>
+                  <HStack spacing={{ base: 2, md: 4 }} flexWrap="wrap">
                     <Button
-                      size="sm"
+                      size={{ base: "xs", md: "sm" }}
                       leftIcon={<Icon as={FaArrowUp} />}
                       colorScheme="green"
                       onClick={() => setIsDepositModalOpen(true)}
+                      flex={{ base: "1", md: "auto" }}
+                      minW={{ base: "80px", md: "auto" }}
                     >
                       Deposit
                     </Button>
                     <Button
-                      size="sm"
+                      size={{ base: "xs", md: "sm" }}
                       leftIcon={<Icon as={FaArrowDown} />}
                       colorScheme="red"
                       onClick={() => setIsWithdrawModalOpen(true)}
+                      flex={{ base: "1", md: "auto" }}
+                      minW={{ base: "80px", md: "auto" }}
                     >
                       Withdraw
                     </Button>
@@ -1305,7 +1309,8 @@ export function Dashboard() {
               <CardBody>
                 <VStack spacing={4} align="stretch">
                   <Heading size="md">Your Assets</Heading>
-                  <Table variant="simple">
+                  <Box overflowX="auto">
+                    <Table variant="simple" size={{ base: "sm", md: "md" }}>
                     <Thead>
                       <Tr>
                         <Th>Asset</Th>
@@ -1367,6 +1372,7 @@ export function Dashboard() {
                       )}
                     </Tbody>
                   </Table>
+                  </Box>
                 </VStack>
               </CardBody>
             </Card>
@@ -1376,7 +1382,8 @@ export function Dashboard() {
               <CardBody>
                 <VStack spacing={4} align="stretch">
                   <Heading size="md">Recent Transactions</Heading>
-                  <Table variant="simple">
+                  <Box overflowX="auto">
+                    <Table variant="simple" size={{ base: "sm", md: "md" }}>
                     <Thead>
                       <Tr>
                         <Th>Type</Th>
@@ -1413,6 +1420,7 @@ export function Dashboard() {
                       ))}
                     </Tbody>
                   </Table>
+                  </Box>
                 </VStack>
               </CardBody>
             </Card>

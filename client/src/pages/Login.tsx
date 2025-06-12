@@ -61,19 +61,19 @@ export function Login() {
   };
 
   return (
-    <Center minH="100vh" bg="black">
-      <Container maxW="container.sm" py={10}>
-        <VStack spacing={8} align="stretch">
+    <Center minH="100vh" bg="black" px={{ base: 4, md: 0 }}>
+      <Container maxW="container.sm" py={{ base: 6, md: 10 }}>
+        <VStack spacing={{ base: 6, md: 8 }} align="stretch">
           <VStack spacing={3} align="center">
-            <Heading size="xl" color="white">Welcome Back</Heading>
-            <Text color="gray.400">Please sign in to continue</Text>
+            <Heading size={{ base: "lg", md: "xl" }} color="white">Welcome Back</Heading>
+            <Text color="gray.400" fontSize={{ base: "sm", md: "md" }}>Please sign in to continue</Text>
           </VStack>
 
           <Box
             as="form"
             onSubmit={handleSubmit}
             bg="gray.900"
-            p={8}
+            p={{ base: 6, md: 8 }}
             borderRadius="xl"
             borderWidth="1px"
             borderColor="whiteAlpha.200"

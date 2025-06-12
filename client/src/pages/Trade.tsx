@@ -344,13 +344,13 @@ export function Trade() {
   const currentPrice = priceData[selectedPair.id] || { price: 0, change: 0 };
 
   return (
-    <Box minH="100vh" bg="black" py={8}>
-      <Container maxW="container.xl">
+    <Box minH="100vh" bg="black" py={{ base: 4, md: 8 }}>
+      <Container maxW="container.xl" px={{ base: 4, md: 8 }}>
         {/* Cryptocurrency Pair Selection */}
         <Card bg="gray.900" borderRadius="xl" mb={8}>
           <CardHeader>
             <Heading size="lg" color="white" mb={4}>Select Trading Pair</Heading>
-            <Grid templateColumns={{ base: "repeat(2, 1fr)", md: "repeat(4, 1fr)", lg: "repeat(6, 1fr)" }} gap={4}>
+            <Grid templateColumns={{ base: "repeat(1, 1fr)", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(6, 1fr)" }} gap={4}>
               {CRYPTO_PAIRS.map((pair) => {
                 const pairPrice = priceData[pair.id] || { price: 0, change: 0 };
                 const isSelected = selectedPair.id === pair.id;
@@ -394,7 +394,7 @@ export function Trade() {
           </CardHeader>
         </Card>
 
-        <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={8}>
+        <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={{ base: 6, md: 8 }}>
           {/* Trading Section */}
           <GridItem>
             <Card bg="gray.900" borderRadius="xl">

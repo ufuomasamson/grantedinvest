@@ -84,7 +84,7 @@ export function Contact() {
     <Box bg="black" minH="100vh">
       {/* Hero Section */}
       <Box
-        py={20}
+        py={{ base: 12, md: 20 }}
         bg="linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)"
         position="relative"
         overflow="hidden"
@@ -102,23 +102,23 @@ export function Contact() {
           zIndex: 0
         }}
       >
-        <Container maxW="container.xl" position="relative" zIndex={1}>
+        <Container maxW="container.xl" position="relative" zIndex={1} px={{ base: 4, md: 8 }}>
           <VStack spacing={8} textAlign="center">
             <VStack spacing={4}>
-              <Text 
-                fontSize="sm" 
-                color="orange.400" 
-                fontWeight="bold" 
-                textTransform="uppercase" 
+              <Text
+                fontSize={{ base: "xs", md: "sm" }}
+                color="orange.400"
+                fontWeight="bold"
+                textTransform="uppercase"
                 letterSpacing="wider"
               >
                 Get In Touch
               </Text>
-              <Heading size="3xl" color="white" maxW="800px">
+              <Heading size={{ base: "xl", md: "2xl", lg: "3xl" }} color="white" maxW="800px">
                 We're Here to Help You Succeed
               </Heading>
-              <Text fontSize="xl" color="gray.400" maxW="700px" lineHeight="1.6">
-                Have questions about our platform? Need technical support? Want to discuss 
+              <Text fontSize={{ base: "lg", md: "xl" }} color="gray.400" maxW="700px" lineHeight="1.6">
+                Have questions about our platform? Need technical support? Want to discuss
                 enterprise solutions? Our team is ready to assist you.
               </Text>
             </VStack>
@@ -127,8 +127,8 @@ export function Contact() {
       </Box>
 
       {/* Contact Methods */}
-      <Box py={20} bg="gray.950">
-        <Container maxW="container.xl">
+      <Box py={{ base: 12, md: 20 }} bg="gray.950">
+        <Container maxW="container.xl" px={{ base: 4, md: 8 }}>
           <VStack spacing={16}>
             <VStack spacing={6} textAlign="center">
               <Text 

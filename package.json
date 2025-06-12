@@ -1,0 +1,17 @@
+{
+  "name": "gcrypto",
+  "version": "1.0.0",
+  "description": "Crypto Investment Platform",
+  "scripts": {
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
+    "build": "cd client && npm run build && cd ../server && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.9",
+    "react-chartjs-2": "^5.3.0"
+  }
+}

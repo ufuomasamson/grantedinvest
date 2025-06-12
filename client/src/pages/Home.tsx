@@ -234,7 +234,7 @@ export function Home() {
                     letterSpacing="wider"
                     mb={4}
                   >
-                    Professional Trading Platform
+                    WELCOME TO GRANTED INVESTMENT
                   </Text>
                   <Heading
                     size={{ base: "2xl", md: "3xl", lg: "4xl" }}

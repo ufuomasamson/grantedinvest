@@ -11,6 +11,8 @@ import { ChatModal } from './ChatModal';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
+
+
 interface ChatIconProps {
   position?: 'fixed' | 'relative';
   bottom?: string;
@@ -103,9 +105,10 @@ export function ChatIcon({
         bottom={bottom}
         right={right}
         zIndex={1000}
+        padding="8px"
       >
         <Tooltip label="Live Support Chat" placement="left">
-          <Box position="relative">
+          <Box position="relative" display="inline-block">
             <IconButton
               aria-label="Open chat"
               icon={<FaComments />}
@@ -119,21 +122,49 @@ export function ChatIcon({
                 boxShadow: 'xl',
               }}
               transition="all 0.2s"
+              position="relative"
+              zIndex={1}
             />
             {unreadCount > 0 && (
               <Badge
                 position="absolute"
-                top="-2px"
-                right="-2px"
-                colorScheme="red"
+                top="-8px"
+                right="-8px"
+                bg="red.500"
+                color="white"
                 borderRadius="full"
                 fontSize="xs"
-                minW="20px"
-                h="20px"
+                minW="24px"
+                h="24px"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-                animation="pulse 2s infinite"
+                zIndex={2}
+                border="2px solid"
+                borderColor="white"
+                fontWeight="bold"
+                boxShadow="0 2px 8px rgba(0,0,0,0.4), 0 0 0 0 rgba(245, 101, 101, 0.7)"
+                sx={{
+                  animation: 'pulse 2s infinite',
+                  '@keyframes pulse': {
+                    '0%': {
+                      transform: 'scale(1)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.4), 0 0 0 0 rgba(245, 101, 101, 0.7)',
+                    },
+                    '70%': {
+                      transform: 'scale(1.05)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.4), 0 0 0 8px rgba(245, 101, 101, 0)',
+                    },
+                    '100%': {
+                      transform: 'scale(1)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.4), 0 0 0 0 rgba(245, 101, 101, 0)',
+                    },
+                  },
+                }}
+                _hover={{
+                  transform: 'scale(1.1)',
+                }}
+                transition="transform 0.2s"
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </Badge>

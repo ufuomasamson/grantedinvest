@@ -93,6 +93,7 @@ interface TradeModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedCoin?: PortfolioCoin;
+  onTradeSuccess?: () => void;
 }
 
 const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
@@ -653,20 +654,138 @@ const DepositModal = ({ isOpen, onClose }: DepositModalProps) => {
 
 
 
-const TradeModal = ({ isOpen, onClose, selectedCoin }: TradeModalProps) => {
+const TradeModal = ({ isOpen, onClose, selectedCoin, onTradeSuccess }: TradeModalProps) => {
+  const { user } = useAuth();
   const [type, setType] = useState<'buy' | 'sell'>('buy');
   const [amount, setAmount] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
 
-  const handleTrade = () => {
-    toast({
-      title: `${type.toUpperCase()} Order Placed`,
-      description: `${type === 'buy' ? 'Bought' : 'Sold'} ${amount} ${selectedCoin?.symbol || 'BTC'}`,
-      status: 'success',
-      duration: 5000,
-      isClosable: true,
-    });
-    onClose();
+  const handleTrade = async () => {
+    if (!amount || parseFloat(amount) <= 0 || !user?.id || !selectedCoin) return;
+
+    const tradeAmount = parseFloat(amount);
+    const currentPrice = selectedCoin.current_price;
+    const totalValue = tradeAmount * currentPrice;
+    const tradeFee = totalValue * 0.001; // 0.1% trading fee
+    const netTotal = totalValue + tradeFee;
+
+    setIsSubmitting(true);
+    try {
+      // Check user balance for buy orders
+      if (type === 'buy') {
+        const { data: balanceData } = await supabase
+          .from('user_balances')
+          .select('balance')
+          .eq('user_id', user.id)
+          .single();
+
+        const currentBalance = balanceData?.balance || 0;
+        if (currentBalance < netTotal) {
+          throw new Error('Insufficient balance for this trade');
+        }
+      } else {
+        // For sell orders, check if user has enough crypto
+        const { data: tradesData } = await supabase
+          .from('trades')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('symbol', selectedCoin.id === 'bitcoin' ? 'btc' : selectedCoin.id);
+
+        // Calculate current holdings
+        let currentHoldings = 0;
+        if (tradesData) {
+          tradesData.forEach(trade => {
+            if (trade.type === 'buy') {
+              currentHoldings += trade.amount || 0;
+            } else if (trade.type === 'sell') {
+              currentHoldings -= trade.amount || 0;
+            }
+          });
+        }
+
+        if (currentHoldings < tradeAmount) {
+          throw new Error(`Insufficient ${selectedCoin.symbol} balance. You have ${currentHoldings.toFixed(6)} ${selectedCoin.symbol}`);
+        }
+      }
+
+      // Save trade to database
+      const { error: tradeError } = await supabase
+        .from('trades')
+        .insert({
+          user_id: user.id,
+          type: type,
+          symbol: selectedCoin.id === 'bitcoin' ? 'btc' : selectedCoin.id,
+          amount: tradeAmount,
+          price: currentPrice,
+          total: totalValue,
+          fee: tradeFee
+        });
+
+      if (tradeError) {
+        console.error('Error saving trade:', tradeError);
+        throw new Error(`Failed to save trade: ${tradeError.message}`);
+      }
+
+      // Update user balance
+      const { data: currentBalanceData } = await supabase
+        .from('user_balances')
+        .select('balance')
+        .eq('user_id', user.id)
+        .single();
+
+      const currentBalance = currentBalanceData?.balance || 0;
+      let newBalance = currentBalance;
+
+      if (type === 'buy') {
+        // Buy - deduct USDT (including fee)
+        newBalance = currentBalance - netTotal;
+      } else {
+        // Sell - add USDT (minus fee)
+        newBalance = currentBalance + (totalValue - tradeFee);
+      }
+
+      const { error: balanceError } = await supabase
+        .from('user_balances')
+        .update({
+          balance: newBalance,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id);
+
+      if (balanceError) {
+        console.error('Error updating balance:', balanceError);
+        throw new Error('Failed to update balance');
+      }
+
+      toast({
+        title: '🎉 Trade Executed Successfully!',
+        description: `${type === 'buy' ? 'Bought' : 'Sold'} ${amount} ${selectedCoin.symbol} for $${totalValue.toLocaleString()} (Fee: $${tradeFee.toFixed(2)})`,
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+
+      setAmount('');
+      onClose();
+
+      // Trigger data refresh
+      if (onTradeSuccess) {
+        onTradeSuccess();
+      }
+
+    } catch (error) {
+      console.error('Trade execution error:', error);
+      toast({
+        title: 'Trade Failed',
+        description: error instanceof Error ? error.message : 'Failed to execute trade. Please try again.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -705,18 +824,46 @@ const TradeModal = ({ isOpen, onClose, selectedCoin }: TradeModalProps) => {
                 </NumberInputStepper>
               </NumberInput>
             </FormControl>
-            {selectedCoin && (
-              <Text>
-                Estimated Total: ${(Number(amount) * selectedCoin.current_price).toFixed(2)}
-              </Text>
+            {selectedCoin && amount && (
+              <VStack spacing={2} align="stretch" p={3} bg="gray.700" borderRadius="md">
+                <HStack justify="space-between">
+                  <Text fontSize="sm" color="gray.400">Price per {selectedCoin.symbol}:</Text>
+                  <Text fontSize="sm">${selectedCoin.current_price.toLocaleString()}</Text>
+                </HStack>
+                <HStack justify="space-between">
+                  <Text fontSize="sm" color="gray.400">Subtotal:</Text>
+                  <Text fontSize="sm">${(Number(amount) * selectedCoin.current_price).toFixed(2)}</Text>
+                </HStack>
+                <HStack justify="space-between">
+                  <Text fontSize="sm" color="gray.400">Trading Fee (0.1%):</Text>
+                  <Text fontSize="sm">${(Number(amount) * selectedCoin.current_price * 0.001).toFixed(2)}</Text>
+                </HStack>
+                <HStack justify="space-between" borderTop="1px" borderColor="gray.600" pt={2}>
+                  <Text fontWeight="bold" color="white">
+                    {type === 'buy' ? 'Total Cost:' : 'You Receive:'}
+                  </Text>
+                  <Text fontWeight="bold" color={type === 'buy' ? 'red.400' : 'green.400'}>
+                    ${type === 'buy'
+                      ? (Number(amount) * selectedCoin.current_price * 1.001).toFixed(2)
+                      : (Number(amount) * selectedCoin.current_price * 0.999).toFixed(2)
+                    }
+                  </Text>
+                </HStack>
+              </VStack>
             )}
           </VStack>
         </ModalBody>
         <ModalFooter>
-          <Button variant="ghost" mr={3} onClick={onClose}>
+          <Button variant="ghost" mr={3} onClick={onClose} isDisabled={isSubmitting}>
             Cancel
           </Button>
-          <Button colorScheme={type === 'buy' ? 'green' : 'red'} onClick={handleTrade}>
+          <Button
+            colorScheme={type === 'buy' ? 'green' : 'red'}
+            onClick={handleTrade}
+            isLoading={isSubmitting}
+            loadingText={`${type === 'buy' ? 'Buying' : 'Selling'}...`}
+            isDisabled={!amount || parseFloat(amount) <= 0}
+          >
             {type === 'buy' ? 'Buy' : 'Sell'} {selectedCoin?.symbol || 'BTC'}
           </Button>
         </ModalFooter>
@@ -1446,6 +1593,11 @@ export function Dashboard() {
         isOpen={isTradeModalOpen}
         onClose={() => setIsTradeModalOpen(false)}
         selectedCoin={selectedCoin}
+        onTradeSuccess={() => {
+          // Refresh user data after successful trade
+          setIsLoading(true);
+          // The useEffect will handle the refresh
+        }}
       />
 
       {/* Live Chat Icon */}

@@ -158,7 +158,7 @@ export function Contact() {
                 icon={FaEnvelope}
                 title="Email Support"
                 description="Send us detailed questions and get comprehensive answers"
-                info="support@gcrypto.com"
+                info="patriciawayne974@gmail.com"
                 color="blue.400"
               />
               
@@ -166,7 +166,7 @@ export function Contact() {
                 icon={FaPhone}
                 title="Phone Support"
                 description="Speak directly with our support specialists"
-                info="+1 (555) 123-4567"
+                info="+14068024456"
                 color="orange.400"
               />
               

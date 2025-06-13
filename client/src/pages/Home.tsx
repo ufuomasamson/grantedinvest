@@ -862,7 +862,7 @@ export function Home() {
               <VStack align="flex-start" spacing={4}>
                 <Text fontSize="lg" fontWeight="bold" color="white">Contact</Text>
                 <Text color="gray.300">California, USA</Text>
-                <Text color="gray.300">info@ginvestment.com</Text>
+                <Text color="gray.300">patriciawayne974@gmail.com</Text>
               </VStack>
             </GridItem>
             <GridItem>

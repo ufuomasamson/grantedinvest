@@ -30,10 +30,11 @@ interface WithdrawModalProps {
   isOpen: boolean;
   onClose: () => void;
   userBalance: number;
+  availableProfitDisplay?: string;
   onWithdrawSuccess: () => void;
 }
 
-export function WithdrawModal({ isOpen, onClose, userBalance, onWithdrawSuccess }: WithdrawModalProps) {
+export function WithdrawModal({ isOpen, onClose, userBalance, availableProfitDisplay, onWithdrawSuccess }: WithdrawModalProps) {
   const { user } = useAuth();
   const toast = useToast();
 
@@ -187,14 +188,16 @@ export function WithdrawModal({ isOpen, onClose, userBalance, onWithdrawSuccess 
     <Modal isOpen={isOpen} onClose={handleClose} size={{ base: "full", md: "lg" }}>
       <ModalOverlay />
       <ModalContent bg="gray.800" color="white" mx={{ base: 4, md: 0 }} my={{ base: 0, md: "auto" }}>
-        <ModalHeader fontSize={{ base: "lg", md: "xl" }}>Withdraw Funds</ModalHeader>
+        <ModalHeader fontSize={{ base: "lg", md: "xl" }}>Withdraw Profits</ModalHeader>
         <ModalCloseButton />
         <ModalBody px={{ base: 4, md: 6 }}>
           <VStack spacing={{ base: 3, md: 4 }}>
             <Alert status="info" bg="blue.900" color="white" borderRadius="md">
               <AlertIcon />
               <Box>
-                <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>Available Balance: ${userBalance.toLocaleString()}</Text>
+                <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>
+                  Available Profit: ${availableProfitDisplay ?? userBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </Text>
                 <Text fontSize={{ base: "xs", md: "sm" }}>Withdrawals are processed within 24-48 hours after verification.</Text>
               </Box>
             </Alert>
@@ -327,7 +330,7 @@ export function WithdrawModal({ isOpen, onClose, userBalance, onWithdrawSuccess 
 
             {amount && parseFloat(amount) > 0 && (
               <Box bg="gray.700" p={3} borderRadius="md" w="full">
-                <Text fontSize="sm" color="gray.300">Withdrawal Summary:</Text>
+                <Text fontSize="sm" color="gray.300">Profit Withdrawal Summary:</Text>
                 <HStack justify="space-between">
                   <Text>Amount:</Text>
                   <Text fontWeight="bold">${parseFloat(amount).toLocaleString()}</Text>

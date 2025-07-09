@@ -1,6 +1,6 @@
-import {
+  import React from 'react';
+  import {
   Box,
-  Container,
   VStack,
   HStack,
   Heading,
@@ -889,6 +889,14 @@ export function Dashboard() {
   const [pendingDeposits, setPendingDeposits] = useState<any[]>([]);
   const toast = useToast();
 
+  // Calculate profit as $30 per 24h since account creation or a fixed start date
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const now = new Date();
+  const profitStart = new Date('2025-07-01T00:00:00Z');
+  const profitDays = Math.floor((now - profitStart) / msPerDay);
+  const profitValue = profitDays * 30;
+  const profitDisplay = profitValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
   // Check for deposit status changes on mount and periodically
   // DISABLED - useEffect that was calling checkDepositStatusChanges
   // This was causing the "checkDepositStatusChanges is not defined" error
@@ -1141,440 +1149,187 @@ export function Dashboard() {
 
   // Removed excessive logging to prevent console spam
 
-  if (isLoading) {
+  // Wait for both loading to be false and user to be present before rendering dashboard
+  if (isLoading || !user) {
     return (
       <Center h="calc(100vh - 64px)">
         <Spinner size="xl" color="orange.500" thickness="4px" />
+        <Text color="gray.400" mt={4}>Loading your dashboard...</Text>
       </Center>
     );
   }
 
   return (
-    <Container maxW="container.xl" py={{ base: 4, md: 8 }} px={{ base: 4, md: 8 }}>
-      <VStack spacing={{ base: 6, md: 8 }} align="stretch">
-        {/* Welcome Section */}
-        <Box>
-          <Heading size="xl" color="white" mb={2}>
-            Welcome back
-          </Heading>
-          <Text color="gray.400" fontSize="lg">
-            {user?.email}
-          </Text>
-        </Box>
-
-        {/* Dashboard Cards */}
-        <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }} gap={6}>
-          {/* Total Balance Card */}
-          <GridItem>
-            <Card bg="gray.800" borderColor="orange.500" borderWidth="1px">
-              <CardHeader>
-                <HStack spacing={4}>
-                  <Icon as={FaWallet} boxSize={6} color="orange.500" />
-                  <Heading size="md" color="white">Total Balance</Heading>
-                </HStack>
-              </CardHeader>
+    <React.Fragment>
+      <Box maxW="container.xl" py={{ base: 4, md: 8 }} px={{ base: 4, md: 8 }} mx="auto">
+        <VStack spacing={{ base: 6, md: 8 }} align="stretch">
+          {/* Welcome Section */}
+          <Box>
+            <Heading size="xl" color="white" mb={2}>
+              Welcome back
+            </Heading>
+            <Text color="gray.400" fontSize="lg">
+              {user.email}
+            </Text>
+          </Box>
+          {/* Dashboard Cards */}
+          <Grid templateColumns={{ base: '1fr', md: 'repeat(4, 1fr)' }} gap={6}>
+            {/* Total Balance */}
+            <Card bg="gray.700">
               <CardBody>
-                <VStack align="start" spacing={2}>
-                  <Text fontSize="3xl" fontWeight="bold" color="white">
-                    ${totalValue.toLocaleString()}
-                  </Text>
-                  <HStack spacing={{ base: 2, md: 4 }} flexWrap="wrap">
-                    <Button
-                      size={{ base: "xs", md: "sm" }}
-                      leftIcon={<Icon as={FaArrowUp} />}
-                      colorScheme="green"
-                      onClick={() => setIsDepositModalOpen(true)}
-                      flex={{ base: "1", md: "auto" }}
-                      minW={{ base: "80px", md: "auto" }}
-                    >
-                      Deposit
-                    </Button>
-                    <Button
-                      size={{ base: "xs", md: "sm" }}
-                      leftIcon={<Icon as={FaArrowDown} />}
-                      colorScheme="red"
-                      onClick={() => setIsWithdrawModalOpen(true)}
-                      flex={{ base: "1", md: "auto" }}
-                      minW={{ base: "80px", md: "auto" }}
-                    >
-                      Withdraw
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      colorScheme="blue"
-                      onClick={async () => {
-                        setIsLoading(true);
-
-                        try {
-                          // Fetch user balance
-                          const { data: balanceData, error: balanceError } = await supabase
-                            .from('user_balances')
-                            .select('*')
-                            .eq('user_id', user.id);
-
-                          if (balanceError) {
-                            setUserBalance(0);
-                          } else if (balanceData && balanceData.length > 0) {
-                            const balance = balanceData[0].balance || 0;
-                            setUserBalance(balance);
-                          } else {
-                            setUserBalance(0);
-                          }
-
-                          // Fetch transactions (deposits and trades)
-                          const { data: depositsData, error: depositsError } = await supabase
-                            .from('deposits')
-                            .select('*')
-                            .eq('user_id', user.id)
-                            .order('created_at', { ascending: false });
-
-                          const { data: tradesData, error: tradesError } = await supabase
-                            .from('trades')
-                            .select('*')
-                            .eq('user_id', user.id)
-                            .order('created_at', { ascending: false });
-
-                          let allTransactions: Transaction[] = [];
-
-                          // Add deposits
-                          if (!depositsError && depositsData) {
-                            const depositTransactions = depositsData.map(deposit => ({
-                              id: deposit.id,
-                              type: 'deposit' as const,
-                              coin: deposit.wallet_type,
-                              amount: deposit.amount,
-                              price: 1,
-                              total: deposit.amount,
-                              date: deposit.created_at,
-                              status: deposit.status === 'approved' ? 'completed' : deposit.status === 'rejected' ? 'failed' : 'pending'
-                            }));
-                            allTransactions = [...allTransactions, ...depositTransactions];
-                          }
-
-                          // Add trades
-                          if (!tradesError && tradesData) {
-                            const tradeTransactions = tradesData.map(trade => ({
-                              id: trade.id,
-                              type: trade.type as 'buy' | 'sell',
-                              coin: 'BTC',
-                              amount: trade.amount,
-                              price: trade.price,
-                              total: trade.total,
-                              date: trade.created_at,
-                              status: 'completed'
-                            }));
-                            allTransactions = [...allTransactions, ...tradeTransactions];
-                          }
-
-                          // Sort and set transactions
-                          allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-                          setTransactions(allTransactions);
-
-                          // Calculate and set portfolio
-                          let btcHoldings = 0;
-                          if (tradesData) {
-                            tradesData.forEach(trade => {
-                              if (trade.type === 'buy') {
-                                btcHoldings += trade.amount || 0;
-                              } else if (trade.type === 'sell') {
-                                btcHoldings -= trade.amount || 0;
-                              }
-                            });
-                          }
-
-                          // Fetch BTC price and update portfolio
-                          try {
-                            const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
-                            const priceData = await priceResponse.json();
-                            const btcPrice = priceData.bitcoin?.usd || 0;
-                            const btcChange = priceData.bitcoin?.usd_24h_change || 0;
-
-                            const portfolioData: PortfolioCoin[] = [];
-                            if (btcHoldings > 0) {
-                              portfolioData.push({
-                                id: 'bitcoin',
-                                name: 'Bitcoin',
-                                symbol: 'BTC',
-                                amount: btcHoldings.toFixed(6),
-                                current_price: btcPrice,
-                                value_usd: btcHoldings * btcPrice,
-                                price_change_percentage_24h: btcChange
-                              });
-                            }
-                            setPortfolio(portfolioData);
-                          } catch (error) {
-                            console.error('Error fetching BTC price:', error);
-                            setPortfolio([]);
-                          }
-
-                          console.log('Refreshed all data:', { allTransactions, btcHoldings });
-
-                          toast({
-                            title: 'Data Refreshed',
-                            description: 'Dashboard data has been updated',
-                            status: 'success',
-                            duration: 2000,
-                            isClosable: true,
-                          });
-                        } catch (error) {
-                          console.error('Refresh error:', error);
-                          toast({
-                            title: 'Refresh Failed',
-                            description: 'Failed to refresh data',
-                            status: 'error',
-                            duration: 3000,
-                            isClosable: true,
-                          });
-                        } finally {
-                          setIsLoading(false);
-                        }
-                      }}
-                    >
-                      Refresh
-                    </Button>
-                  </HStack>
-                </VStack>
+                <Stat>
+                  <StatLabel color="gray.400">Total Balance</StatLabel>
+                  <StatNumber color="orange.300" fontSize="2xl">${userBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</StatNumber>
+                  <StatHelpText color="gray.400">USD</StatHelpText>
+                </Stat>
+                <Button mt={4} colorScheme="green" leftIcon={<FaArrowUp />} onClick={() => setIsDepositModalOpen(true)} size="sm" w="full">
+                  Deposit
+                </Button>
               </CardBody>
             </Card>
-          </GridItem>
-
-          {/* 24h Change Card */}
-          <GridItem>
-            <Card bg="gray.800" borderColor="blue.500" borderWidth="1px">
-              <CardHeader>
-                <HStack spacing={4}>
-                  <Icon as={FaChartLine} boxSize={6} color="blue.500" />
-                  <Heading size="md" color="white">24h Change</Heading>
-                </HStack>
-              </CardHeader>
+            {/* Profit Card */}
+            <Card bg="gray.700">
               <CardBody>
-                <VStack align="start" spacing={2}>
-                  <Text
-                    fontSize="2xl"
-                    fontWeight="bold"
-                    color={dailyChangePercentage >= 0 ? 'green.400' : 'red.400'}
-                  >
-                    {dailyChangePercentage >= 0 ? '+' : ''}{dailyChangePercentage.toFixed(2)}%
-                  </Text>
-                  <Text color="gray.400" fontSize="sm">
-                    ${Math.abs(dailyChange).toLocaleString()} {dailyChangePercentage >= 0 ? 'gain' : 'loss'}
-                  </Text>
-                </VStack>
+                <Stat>
+                  <StatLabel color="gray.400">Profit</StatLabel>
+                  <StatNumber color="green.300" fontSize="2xl">
+                    ${profitDisplay}
+                  </StatNumber>
+                  <StatHelpText color="gray.400">USD (increases $30 every 24h)</StatHelpText>
+                </Stat>
+                {/* Withdraw info removed from Profit card; now only in Withdraw popup */}
+                <Button mt={2} colorScheme="red" leftIcon={<FaArrowDown />} onClick={() => setIsWithdrawModalOpen(true)} size="sm" w="full">
+                  Withdraw
+                </Button>
               </CardBody>
             </Card>
-          </GridItem>
-
-          {/* Quick Trade Card */}
-          <GridItem>
-            <Card bg="gray.800" borderColor="green.500" borderWidth="1px">
-              <CardHeader>
-                <HStack spacing={4}>
-                  <Icon as={FaRocket} boxSize={6} color="green.500" />
-                  <Heading size="md" color="white">Quick Trade</Heading>
-                </HStack>
-              </CardHeader>
+            {/* 24h Change */}
+            <Card bg="gray.700">
               <CardBody>
-                <VStack align="start" spacing={4}>
-                  <Text color="gray.400" fontSize="sm">
-                    Start trading cryptocurrencies instantly
-                  </Text>
-                  <Button
-                    colorScheme="green"
-                    leftIcon={<Icon as={FaExchangeAlt} />}
-                    onClick={handleGoToTrade}
-                    w="full"
-                  >
+                <Stat>
+                  <StatLabel color="gray.400">24h Change</StatLabel>
+                  <StatNumber color={dailyChange >= 0 ? 'green.300' : 'red.300'}>
+                    {dailyChange >= 0 ? '+' : ''}{dailyChange.toFixed(2)}
+                  </StatNumber>
+                  <StatHelpText color={dailyChangePercentage >= 0 ? 'green.400' : 'red.400'}>
+                    <StatArrow type={dailyChangePercentage >= 0 ? 'increase' : 'decrease'} />
+                    {dailyChangePercentage.toFixed(2)}%
+                  </StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
+            {/* Quick Trade */}
+            <Card bg="gray.700">
+              <CardBody>
+                <VStack align="start" spacing={2}>
+                  <Text color="gray.400" fontWeight="bold">Quick Trade</Text>
+                  <Button colorScheme="orange" leftIcon={<FaExchangeAlt />} onClick={handleGoToTrade} size="sm">
                     Go to Trade
                   </Button>
                 </VStack>
               </CardBody>
             </Card>
-          </GridItem>
+          </Grid>
 
-          {/* Time Range Card */}
-          <GridItem>
-            <Card bg="gray.800" borderColor="purple.500" borderWidth="1px">
-              <CardHeader>
-                <HStack spacing={4}>
-                  <Icon as={FaClock} boxSize={6} color="purple.500" />
-                  <Heading size="md" color="white">Time Range</Heading>
-                </HStack>
-              </CardHeader>
-              <CardBody>
-                <VStack align="start" spacing={4}>
-                  <Select
-                    value={selectedTimeRange}
-                    onChange={(e) => setSelectedTimeRange(e.target.value)}
-                    bg="gray.700"
-                    borderColor="gray.600"
-                    color="white"
-                  >
-                    <option value="24h">24 Hours</option>
-                    <option value="1d">1 Day</option>
-                    <option value="2d">2 Days</option>
-                    <option value="3d">3 Days</option>
-                    <option value="1w">1 Week</option>
-                    <option value="2w">2 Weeks</option>
-                    <option value="1m">1 Month</option>
-                    <option value="2m">2 Months</option>
-                  </Select>
-                  <Text
-                    fontSize="xl"
-                    fontWeight="bold"
-                    color={getTimeRangePercentage(selectedTimeRange) >= 0 ? 'green.400' : 'red.400'}
-                  >
-                    {getTimeRangePercentage(selectedTimeRange) >= 0 ? '+' : ''}{getTimeRangePercentage(selectedTimeRange)}%
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-          </GridItem>
-        </Grid>
+          {/* Pending Deposits Notification */}
+          {transactions.some(tx => tx.type === 'deposit' && tx.status === 'pending') && (
+            <Alert status="info" bg="blue.900" borderRadius="md" color="blue.100" mb={2}>
+              <AlertIcon />
+              <Box flex="1">
+                <AlertTitle>Deposit Pending</AlertTitle>
+                <AlertDescription>
+                  You have one or more deposits awaiting admin approval. Your balance will update once approved.
+                </AlertDescription>
+              </Box>
+              <CloseButton position="absolute" right="8px" top="8px" />
+            </Alert>
+          )}
 
-        {/* Pending Deposits Notification */}
-        {pendingDeposits.length > 0 && (
-          <Alert status="info" bg="blue.900" borderColor="blue.500" borderWidth="1px">
-            <AlertIcon color="blue.400" />
-            <Box flex="1">
-              <AlertTitle color="blue.200">
-                {pendingDeposits.length} Deposit{pendingDeposits.length > 1 ? 's' : ''} Awaiting Approval
-              </AlertTitle>
-              <AlertDescription color="blue.100">
-                {pendingDeposits.length === 1 ? (
-                  `Your $${pendingDeposits[0].amount} ${pendingDeposits[0].wallet_type} deposit is being reviewed by our admin team. You'll receive a notification once it's approved.`
-                ) : (
-                  `You have ${pendingDeposits.length} deposits totaling $${pendingDeposits.reduce((sum, d) => sum + d.amount, 0)} being reviewed. You'll receive notifications as they are processed.`
-                )}
-              </AlertDescription>
-            </Box>
-          </Alert>
-        )}
+          {/* Portfolio Table */}
+          <Box bg="gray.800" borderRadius="md" p={4}>
+            <Heading size="md" color="orange.200" mb={4}>Your Assets</Heading>
+            {portfolio.length === 0 ? (
+              <Text color="gray.400">No crypto assets yet. Start trading to build your portfolio!</Text>
+            ) : (
+              <Table variant="simple" colorScheme="orange">
+                <Thead>
+                  <Tr>
+                    <Th color="orange.200">Asset</Th>
+                    <Th color="orange.200">Amount</Th>
+                    <Th color="orange.200">Price</Th>
+                    <Th color="orange.200">Value (USD)</Th>
+                    <Th color="orange.200">24h Change</Th>
+                    <Th color="orange.200">Action</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {portfolio.map(coin => (
+                    <Tr key={coin.id}>
+                      <Td fontWeight="bold">{coin.symbol}</Td>
+                      <Td>{coin.amount}</Td>
+                      <Td>${coin.current_price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Td>
+                      <Td>${coin.value_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Td>
+                      <Td>
+                        <Badge colorScheme={coin.price_change_percentage_24h >= 0 ? 'green' : 'red'}>
+                          {coin.price_change_percentage_24h >= 0 ? '+' : ''}{coin.price_change_percentage_24h.toFixed(2)}%
+                        </Badge>
+                      </Td>
+                      <Td>
+                        <Button size="xs" colorScheme="orange" onClick={() => handleTradeClick(coin)}>
+                          Trade
+                        </Button>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            )}
+          </Box>
 
-            {/* Assets Table */}
-            <Card bg="gray.800">
-              <CardBody>
-                <VStack spacing={4} align="stretch">
-                  <Heading size="md">Your Assets</Heading>
-                  <Box overflowX="auto">
-                    <Table variant="simple" size={{ base: "sm", md: "md" }}>
-                    <Thead>
-                      <Tr>
-                        <Th>Asset</Th>
-                        <Th isNumeric>Amount</Th>
-                        <Th isNumeric>Price</Th>
-                        <Th isNumeric>Value</Th>
-                        <Th isNumeric>24h Change</Th>
-                        <Th>Actions</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {portfolio.length === 0 ? (
-                        <Tr>
-                          <Td colSpan={6} textAlign="center" py={8}>
-                            <VStack spacing={2}>
-                              <Text color="gray.400">No crypto assets found</Text>
-                              <Text color="gray.500" fontSize="sm">
-                                Start trading to see your crypto holdings here
-                              </Text>
-                              <Button
-                                size="sm"
-                                colorScheme="orange"
-                                onClick={handleGoToTrade}
-                              >
-                                Start Trading
-                              </Button>
-                            </VStack>
-                          </Td>
-                        </Tr>
-                      ) : (
-                        portfolio.map((coin) => (
-                          <Tr key={coin.id}>
-                            <Td>
-                              <HStack>
-                                <Text>{coin.name}</Text>
-                                <Text color="gray.500">{coin.symbol}</Text>
-                              </HStack>
-                            </Td>
-                            <Td isNumeric>{coin.amount}</Td>
-                            <Td isNumeric>${coin.current_price.toLocaleString()}</Td>
-                            <Td isNumeric>${coin.value_usd.toLocaleString()}</Td>
-                            <Td isNumeric>
-                              <Text color={coin.price_change_percentage_24h >= 0 ? 'green.400' : 'red.400'}>
-                                {coin.price_change_percentage_24h >= 0 ? '+' : ''}{coin.price_change_percentage_24h}%
-                              </Text>
-                            </Td>
-                            <Td>
-                              <Button
-                                size="sm"
-                                leftIcon={<Icon as={FaExchangeAlt} />}
-                                colorScheme="orange"
-                                onClick={() => handleTradeClick(coin)}
-                              >
-                                Trade
-                              </Button>
-                            </Td>
-                          </Tr>
-                        ))
-                      )}
-                    </Tbody>
-                  </Table>
-                  </Box>
-                </VStack>
-              </CardBody>
-            </Card>
-
-            {/* Recent Transactions */}
-            <Card bg="gray.800">
-              <CardBody>
-                <VStack spacing={4} align="stretch">
-                  <Heading size="md">Recent Transactions</Heading>
-                  <Box overflowX="auto">
-                    <Table variant="simple" size={{ base: "sm", md: "md" }}>
-                    <Thead>
-                      <Tr>
-                        <Th>Type</Th>
-                        <Th>Asset</Th>
-                        <Th isNumeric>Amount</Th>
-                        <Th isNumeric>Price</Th>
-                        <Th isNumeric>Total</Th>
-                        <Th>Date</Th>
-                        <Th>Status</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {transactions.map((tx) => (
-                        <Tr key={tx.id}>
-                          <Td>
-                            <Badge colorScheme={tx.type === 'buy' ? 'green' : 'red'}>
-                              {tx.type.toUpperCase()}
-                            </Badge>
-                          </Td>
-                          <Td>{tx.coin}</Td>
-                          <Td isNumeric>{tx.amount}</Td>
-                          <Td isNumeric>${tx.price.toLocaleString()}</Td>
-                          <Td isNumeric>${tx.total.toLocaleString()}</Td>
-                          <Td>{new Date(tx.date).toLocaleDateString()}</Td>
-                          <Td>
-                            <Badge colorScheme={
-                              tx.status === 'completed' ? 'green' :
-                              tx.status === 'pending' ? 'yellow' : 'red'
-                            }>
-                              {tx.status.toUpperCase()}
-                            </Badge>
-                          </Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                  </Box>
-                </VStack>
-              </CardBody>
-            </Card>
-      </VStack>
-
-      {/* Modals */}
+          {/* Recent Transactions Table */}
+          <Box bg="gray.800" borderRadius="md" p={4}>
+            <Heading size="md" color="orange.200" mb={4}>Recent Transactions</Heading>
+            {transactions.length === 0 ? (
+              <Text color="gray.400">No transactions yet.</Text>
+            ) : (
+              <Table variant="simple" colorScheme="orange">
+                <Thead>
+                  <Tr>
+                    <Th color="orange.200">Type</Th>
+                    <Th color="orange.200">Asset</Th>
+                    <Th color="orange.200">Amount</Th>
+                    <Th color="orange.200">Price</Th>
+                    <Th color="orange.200">Total</Th>
+                    <Th color="orange.200">Date</Th>
+                    <Th color="orange.200">Status</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {transactions.slice(0, 10).map(tx => (
+                    <Tr key={tx.id}>
+                      <Td>
+                        <Badge colorScheme={tx.type === 'buy' ? 'green' : tx.type === 'sell' ? 'red' : 'blue'}>
+                          {tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}
+                        </Badge>
+                      </Td>
+                      <Td>{tx.coin}</Td>
+                      <Td>{tx.amount}</Td>
+                      <Td>{tx.price ? `$${tx.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}</Td>
+                      <Td>{tx.total ? `$${tx.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}</Td>
+                      <Td>{new Date(tx.date).toLocaleString()}</Td>
+                      <Td>
+                        <Badge colorScheme={tx.status === 'completed' ? 'green' : tx.status === 'pending' ? 'yellow' : 'red'}>
+                          {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
+                        </Badge>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            )}
+          </Box>
+        </VStack>
+      </Box>
       <DepositModal
         isOpen={isDepositModalOpen}
         onClose={() => setIsDepositModalOpen(false)}
@@ -1582,11 +1337,10 @@ export function Dashboard() {
       <WithdrawModal
         isOpen={isWithdrawModalOpen}
         onClose={() => setIsWithdrawModalOpen(false)}
-        userBalance={userBalance}
+        userBalance={profitValue}
+        availableProfitDisplay={profitDisplay}
         onWithdrawSuccess={() => {
-          // Refresh user data after successful withdrawal
           setIsLoading(true);
-          // The useEffect will handle the refresh
         }}
       />
       <TradeModal
@@ -1594,14 +1348,10 @@ export function Dashboard() {
         onClose={() => setIsTradeModalOpen(false)}
         selectedCoin={selectedCoin}
         onTradeSuccess={() => {
-          // Refresh user data after successful trade
           setIsLoading(true);
-          // The useEffect will handle the refresh
         }}
       />
-
-      {/* Live Chat Icon */}
       <ChatIcon />
-    </Container>
+    </React.Fragment>
   );
 }

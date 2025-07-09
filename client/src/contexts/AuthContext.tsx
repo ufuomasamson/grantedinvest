@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(false);
         // Don't clear user state on timeout, just stop loading
       }
-    }, 5000); // 5 second fallback
+    }, 10000); // 10 second fallback
 
     initializeAuth();
 

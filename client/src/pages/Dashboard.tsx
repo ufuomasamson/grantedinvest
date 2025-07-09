@@ -880,6 +880,7 @@ export function Dashboard() {
   const [userBalance, setUserBalance] = useState(0);
   const [portfolio, setPortfolio] = useState<PortfolioCoin[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [capitalSpent, setCapitalSpent] = useState(0);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
@@ -1006,6 +1007,7 @@ export function Dashboard() {
         }
 
         // Add trades to transactions
+        let totalCapital = 0;
         if (!tradesError && tradesData) {
           const tradeTransactions: Transaction[] = tradesData.map(trade => {
             const symbol = trade.symbol || 'btc';
@@ -1023,6 +1025,11 @@ export function Dashboard() {
               'link': 'LINK'
             }[symbol] || symbol.toUpperCase();
 
+            // Capital calculation: sum total for all 'buy' trades
+            if (trade.type === 'buy') {
+              totalCapital += (trade.total || 0);
+            }
+
             return {
               id: trade.id,
               type: trade.type as 'buy' | 'sell',
@@ -1036,6 +1043,7 @@ export function Dashboard() {
           });
           allTransactions = [...allTransactions, ...tradeTransactions];
         }
+        setCapitalSpent(totalCapital);
 
         // Sort all transactions by date
         allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -1173,7 +1181,19 @@ export function Dashboard() {
             </Text>
           </Box>
           {/* Dashboard Cards */}
-          <Grid templateColumns={{ base: '1fr', md: 'repeat(4, 1fr)' }} gap={6}>
+          <Grid templateColumns={{ base: '1fr', md: 'repeat(5, 1fr)' }} gap={6}>
+            {/* Capital Card */}
+            <Card bg="gray.700">
+              <CardBody>
+                <Stat>
+                  <StatLabel color="gray.400">Capital Spent</StatLabel>
+                  <StatNumber color="blue.300" fontSize="2xl">
+                    ${capitalSpent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </StatNumber>
+                  <StatHelpText color="gray.400">Total USD spent on buying coins</StatHelpText>
+                </Stat>
+              </CardBody>
+            </Card>
             {/* Total Balance */}
             <Card bg="gray.700">
               <CardBody>
